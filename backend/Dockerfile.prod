@@ -1,22 +1,27 @@
-# backend/Dockerfile.prod
-
+# Stage 1: Build
 FROM python:3.11-slim AS builder
 
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Stage 2: Final Image
 FROM python:3.11-slim
 
 WORKDIR /app
 
+# Copy installed dependencies from builder
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
+# Copy our application code
 COPY ./src /app
 
-RUN python manage.py makemigrations
-RUN python manage.py migrate
-RUN python manage.py collectstatic --noinput
+# --- REMOVED COMMANDS ---
+# We will run these at runtime instead
+# RUN python manage.py makemigrations
+# RUN python manage.py migrate
+# RUN python manage.py collectstatic --noinput
 
+# Set the default command to run Gunicorn
 CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000"]
