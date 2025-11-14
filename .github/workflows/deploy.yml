@@ -7,17 +7,18 @@ on:
 
 jobs:
   build_and_push:
-    # ... (this job is unchanged) ...
     name: Build and Push Docker Images
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
+
       - name: Build and push backend image
         uses: docker/build-push-action@v5
         with:
@@ -25,6 +26,7 @@ jobs:
           file: ./backend/Dockerfile.prod
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/meal-backend:latest
+
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
         with:
@@ -45,24 +47,25 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
+          username: ${{ secrets.SERVER_USER }} # This must be 'root'
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            # Set the project directory path
-            PROJECT_DIR="/home/deployer/smart-meal-system"
-            # Or: PROJECT_DIR="/root/smart-meal-system"
+            # --- THIS IS THE FIX ---
+            # Set the explicit path for the 'root' user
+            PROJECT_DIR="/root/smart-meal-system"
             
             mkdir -p $PROJECT_DIR
             cd $PROJECT_DIR
 
-            # Copy the necessary files from the repo
+            # Copy the necessary files from the repo workspace
             cp ${{ secrets.GITHUB_WORKSPACE }}/docker-compose.prod.yml .
-            # --- ADD THIS ---
-            # Copy the Nginx config so it can be built
             cp -r ${{ secrets.GITHUB_WORKSPACE }}/nginx .
             
             # Create the .env.prod file from the GitHub secret
             echo "${{ secrets.ENV_FILE_PROD }}" > .env.prod
+            
+            # Replace placeholder with Docker username
+            sed -i 's|DOCKER_USERNAME|${{ secrets.DOCKER_USERNAME }}|g' docker-compose.prod.yml
             
             # Pull the new images
             docker-compose -f docker-compose.prod.yml pull
