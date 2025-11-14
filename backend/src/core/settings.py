@@ -12,8 +12,8 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 DEBUG = os.environ.get('DJANGO_DEBUG') == 'True'
 
-ALLOWED_HOSTS = ['meal.projects.sojolrana.com']
-CSRF_TRUSTED_ORIGINS = ['https://meal.projects.sojolrana.com']
+ALLOWED_HOSTS = ['meal.sojolrana.com']
+CSRF_TRUSTED_ORIGINS = ['https://meal.sojolrana.com']
 
 INSTALLED_APPS = [
     'users.apps.UsersConfig',
