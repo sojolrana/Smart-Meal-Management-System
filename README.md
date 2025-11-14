@@ -1,6 +1,6 @@
 # Smart Meal Management System
 
-A full-stack, containerized web application designed to modernize meal management for university residence halls. This system replaces inefficient paper-based processes with a modern, cashless, and data-driven platform for students, hall administrators, and kitchen staff.
+A full-stack, containerized web application designed to modernize meal management for university residence halls. This system replaces inefficient paper-based processes with a modern, cashless, and data-driven platform for students, hall administrators, and kitchen staff .
 
 ## 🚀 Live Demo
 
