@@ -1,0 +1,69 @@
+// frontend/src/app/proxy/auth/login/route.ts
+
+import { NextResponse } from 'next/server';
+import { serialize } from 'cookie';
+
+const API_URL = 'http://nginx/api';
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const { email, password } = body;
+
+    const apiResponse = await fetch(`${API_URL}/auth/token/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!apiResponse.ok) {
+      const errorData = await apiResponse.json();
+      return NextResponse.json(
+        { error: errorData.detail || 'Login failed' },
+        { status: apiResponse.status }
+      );
+    }
+
+    const { access, refresh } = await apiResponse.json();
+
+    if (!access || !refresh) {
+      return NextResponse.json(
+        { error: 'Invalid token response from API' },
+        { status: 500 }
+      );
+    }
+
+    const accessTokenCookie = serialize('access_token', access, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 15,
+      path: '/',
+    });
+
+    const refreshTokenCookie = serialize('refresh_token', refresh, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24,
+      path: '/',
+    });
+
+    const response = NextResponse.json(
+      { message: 'Login successful' },
+      { status: 200 }
+    );
+
+    response.headers.append('Set-Cookie', accessTokenCookie);
+    response.headers.append('Set-Cookie', refreshTokenCookie);
+
+    return response;
+    
+  } catch (error) {
+    console.error('Login proxy error:', error);
+    return NextResponse.json(
+      { error: 'An internal server error occurred' },
+      { status: 500 }
+    );
+  }
+}
