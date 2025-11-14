@@ -8,9 +8,18 @@ services:
     networks:
       - default # This project's internal network
     restart: unless-stopped
+    # --- THIS IS THE FIX ---
+    # We are adding the healthcheck that the backend depends on.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    # --- END OF FIX ---
 
   backend:
-    image: ${{ secrets.DOCKER_USERNAME }}/meal-backend:latest
+    image: DOCKER_USERNAME_PLACEHOLDER/meal-backend:latest
     container_name: meal_backend_prod
     command: sh -c "python manage.py collectstatic --noinput && python manage.py migrate && gunicorn core.wsgi:application --bind 0.0.0.0:8000"
     env_file: .env.prod
@@ -19,13 +28,13 @@ services:
       - media_files_prod:/app/mediafiles
     depends_on:
       db:
-        condition: service_healthy
+        condition: service_healthy # This line will now work
     networks:
       - default
     restart: unless-stopped
 
   frontend:
-    image: ${{ secrets.DOCKER_USERNAME }}/meal-frontend:latest
+    image: DOCKER_USERNAME_PLACEHOLDER/meal-frontend:latest
     container_name: meal_frontend_prod
     depends_on:
       - backend
@@ -34,30 +43,24 @@ services:
     restart: unless-stopped
       
   nginx:
-    # We build the nginx config from this project
     build: ./nginx
-    # This name *must* match the proxy_pass in meal.sojolrana.com.conf
     container_name: meal_nginx_prod 
-    # --- NO PORTS ARE NEEDED ---
     volumes:
       - static_files_prod:/usr/share/nginx/html/static
       - media_files_prod:/usr/share/nginx/html/media
     depends_on:
       - backend
       - frontend
-    # --- THIS IS THE KEY ---
-    # It joins its own network AND the shared network
     networks:
       - default
       - main_proxy_net
     restart: unless-stopped
 
-# Define this project's networks
 networks:
   default:
     driver: bridge
   main_proxy_net:
-    external: true # Use the same manually-created network
+    external: true
 
 volumes:
   postgres_data_prod:
