@@ -1,5 +1,3 @@
-// frontend/src/app/proxy/auth/me/route.ts
-
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 

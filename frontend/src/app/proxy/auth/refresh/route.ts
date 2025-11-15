@@ -1,5 +1,3 @@
-// frontend/src/app/proxy/auth/refresh/route.ts
-
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { serialize } from 'cookie';
