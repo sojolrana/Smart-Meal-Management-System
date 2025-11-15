@@ -90,7 +90,7 @@ export default function StudentRegisterForm() {
         <div>
           <label
             htmlFor="first_name"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-900"
           >
             First Name <span className="text-red-500">*</span>
           </label>
@@ -107,7 +107,7 @@ export default function StudentRegisterForm() {
         <div>
           <label
             htmlFor="last_name"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-900"
           >
             Last Name <span className="text-red-500">*</span>
           </label>
@@ -124,7 +124,7 @@ export default function StudentRegisterForm() {
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-900"
           >
             Email address <span className="text-red-500">*</span>
           </label>
@@ -142,7 +142,7 @@ export default function StudentRegisterForm() {
         <div>
           <label
             htmlFor="password"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-900"
           >
             Password <span className="text-red-500">*</span>
           </label>
@@ -166,7 +166,7 @@ export default function StudentRegisterForm() {
         <div>
           <label
             htmlFor="student_id"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-900"
           >
             Student ID <span className="text-red-500">*</span>
           </label>
@@ -183,7 +183,7 @@ export default function StudentRegisterForm() {
         <div>
           <label
             htmlFor="department_name"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-900"
           >
             Department Name <span className="text-red-500">*</span>
           </label>
@@ -200,7 +200,7 @@ export default function StudentRegisterForm() {
         <div>
           <label
             htmlFor="phone_number"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-900"
           >
             Phone Number <span className="text-red-500">*</span>
           </label>
@@ -217,7 +217,7 @@ export default function StudentRegisterForm() {
         <div>
           <label
             htmlFor="father_name"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-900"
           >
             Father&apos;s Name
           </label>
@@ -233,7 +233,7 @@ export default function StudentRegisterForm() {
         <div>
           <label
             htmlFor="mother_name"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-900"
           >
             Mother&apos;s Name
           </label>
@@ -255,7 +255,7 @@ export default function StudentRegisterForm() {
         <div>
           <label
             htmlFor="photo"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-900"
           >
             Your Photo (512x512) <span className="text-red-500">*</span>
           </label>
@@ -272,7 +272,7 @@ export default function StudentRegisterForm() {
         <div>
           <label
             htmlFor="id_card"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-900"
           >
             Student ID Card <span className="text-red-500">*</span>
           </label>

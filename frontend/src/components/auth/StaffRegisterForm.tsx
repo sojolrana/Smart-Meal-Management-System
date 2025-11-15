@@ -72,7 +72,7 @@ export default function StaffRegisterForm() {
         <div>
           <label
             htmlFor="first_name"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-900"
           >
             First Name <span className="text-red-500">*</span>
           </label>
@@ -89,7 +89,7 @@ export default function StaffRegisterForm() {
         <div>
           <label
             htmlFor="last_name"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-900"
           >
             Last Name <span className="text-red-500">*</span>
           </label>
@@ -106,7 +106,7 @@ export default function StaffRegisterForm() {
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-900"
           >
             Email address <span className="text-red-500">*</span>
           </label>
@@ -123,7 +123,7 @@ export default function StaffRegisterForm() {
         <div>
           <label
             htmlFor="password"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-900"
           >
             Password <span className="text-red-500">*</span>
           </label>
@@ -141,7 +141,7 @@ export default function StaffRegisterForm() {
         <div>
           <label
             htmlFor="staff_id"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-900"
           >
             Staff ID <span className="text-red-500">*</span>
           </label>
@@ -158,7 +158,7 @@ export default function StaffRegisterForm() {
         <div>
           <label
             htmlFor="phone_number"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-900"
           >
             Phone Number <span className="text-red-500">*</span>
           </label>

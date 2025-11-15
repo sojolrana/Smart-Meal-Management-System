@@ -43,7 +43,7 @@ export default function LoginClientPage() {
       <div>
         <label
           htmlFor="email"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-gray-900"
         >
           Email address
         </label>
@@ -64,7 +64,7 @@ export default function LoginClientPage() {
       <div>
         <label
           htmlFor="password"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-gray-900"
         >
           Password
         </label>
