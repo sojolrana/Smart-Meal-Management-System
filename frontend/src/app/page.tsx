@@ -1,10 +1,10 @@
-// frontend/src/app/page.tsx
-
 import Link from 'next/link';
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] text-center px-4">
+    // --- THIS IS THE FIX ---
+    // Added 'bg-gray-50' to match your other pages
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] text-center px-4 bg-gray-50">
       <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight">
         Welcome to the
         <br />
