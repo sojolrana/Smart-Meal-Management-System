@@ -1,17 +1,27 @@
-# frontend/Dockerfile.prod
-
+# Stage 1: Builder
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+
+# --- THIS IS THE FIX ---
+# 1. Declare the build argument
+ARG NEXT_PUBLIC_API_URL
+# 2. Set it as an environment variable *for the build step*
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+# --- END OF FIX ---
+
+# 3. Now, this build step will see the environment variable
 RUN npm run build
 
+# Stage 2: Production
 FROM node:20-alpine
 
 WORKDIR /app
 
+# Copy production-optimized files
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
