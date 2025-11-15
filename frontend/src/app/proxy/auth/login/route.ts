@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import { serialize } from 'cookie';
 
 // --- THIS IS THE FIX ---
-// Use this project's own Nginx container hostname
-const API_URL = 'http://meal_nginx_prod/api';
+// Point directly to the backend service.
+// The frontend container can see the backend container on their shared network.
+const API_URL = 'http://backend:8000/api';
 // --- END OF FIX ---
 
 export async function POST(request: Request) {

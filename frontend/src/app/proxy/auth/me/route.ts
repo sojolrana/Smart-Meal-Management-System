@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
 // --- THIS IS THE FIX ---
-// Use this project's own Nginx container hostname
-const API_URL = 'http://meal_nginx_prod/api';
+// Point directly to the backend service.
+const API_URL = 'http://backend:8000/api';
 // --- END OF FIX ---
 
 export async function GET(request: Request) {
