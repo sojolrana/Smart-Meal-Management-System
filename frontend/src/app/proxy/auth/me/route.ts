@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-// --- THIS IS THE FIX ---
 const API_URL = 'http://backend:8000';
-// --- END OF FIX ---
 
 export async function GET(request: Request) {
   try {
@@ -13,13 +11,17 @@ export async function GET(request: Request) {
     if (!accessToken) {
       return NextResponse.json({ error: 'Not authorized' }, { status: 401 });
     }
+    
+    // --- THIS IS THE FIX ---
+    const host = request.headers.get('host');
+    // --- END OF FIX ---
 
-    // This will now correctly fetch: http://backend:8000/api/auth/me/
     const apiResponse = await fetch(`${API_URL}/api/auth/me/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
+        'Authorization': `Bearer ${accessToken}`,
+        'Host': host || 'meal.sojolrana.com', // Pass the original host
       },
     });
 

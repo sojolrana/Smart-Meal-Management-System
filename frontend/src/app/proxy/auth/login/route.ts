@@ -1,39 +1,37 @@
 import { NextResponse } from 'next/server';
 import { serialize } from 'cookie';
 
-// --- THIS IS THE FIX ---
-// The API_URL is just the hostname and port.
 const API_URL = 'http://backend:8000';
-// --- END OF FIX ---
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { email, password } = body;
+    
+    // --- THIS IS THE FIX ---
+    // Get the original Host header from the browser's request
+    const host = request.headers.get('host');
+    // --- END OF FIX ---
 
-    // This will now correctly fetch: http://backend:8000/api/auth/token/
     const apiResponse = await fetch(`${API_URL}/api/auth/token/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Host': host || 'meal.sojolrana.com', // Pass the original host
       },
       body: JSON.stringify({ email, password }),
     });
 
     if (!apiResponse.ok) {
-      // --- DEBUGGING STEP ---
-      // If it still fails, this will log the HTML
       const errorText = await apiResponse.text();
       console.error("Django API Error:", errorText);
       try {
-        // Try to parse it as JSON
         const errorData = JSON.parse(errorText);
         return NextResponse.json(
           { error: errorData.detail || 'Login failed' },
           { status: apiResponse.status }
         );
       } catch (e) {
-        // If it fails, return the raw text
         return NextResponse.json(
           { error: "Received non-JSON response from backend", details: errorText },
           { status: apiResponse.status }
@@ -41,6 +39,7 @@ export async function POST(request: Request) {
       }
     }
 
+    // ... (rest of file is unchanged) ...
     const { access, refresh } = await apiResponse.json();
 
     if (!access || !refresh) {

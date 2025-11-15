@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG') == 'True'
 
-ALLOWED_HOSTS = ['meal.sojolrana.com']
+ALLOWED_HOSTS = ['meal.sojolrana.com', 'backend']
 CSRF_TRUSTED_ORIGINS = ['https://meal.sojolrana.com']
 
 

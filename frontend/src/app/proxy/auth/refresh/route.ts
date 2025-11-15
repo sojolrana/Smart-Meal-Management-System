@@ -2,9 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { serialize } from 'cookie';
 
-// --- THIS IS THE FIX ---
 const API_URL = 'http://backend:8000';
-// --- END OF FIX ---
 
 export async function POST(request: Request) {
   try {
@@ -14,16 +12,21 @@ export async function POST(request: Request) {
     if (!refreshToken) {
       return NextResponse.json({ error: 'No refresh token found' }, { status: 401 });
     }
+    
+    // --- THIS IS THE FIX ---
+    const host = request.headers.get('host');
+    // --- END OF FIX ---
 
-    // This will now correctly fetch: http://backend:8000/api/auth/token/refresh/
     const apiResponse = await fetch(`${API_URL}/api/auth/token/refresh/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Host': host || 'meal.sojolrana.com', // Pass the original host
       },
       body: JSON.stringify({ refresh: refreshToken }),
     });
 
+    // ... (rest of file is unchanged) ...
     if (!apiResponse.ok) {
       const errorData = await apiResponse.json();
       const response = NextResponse.json(
