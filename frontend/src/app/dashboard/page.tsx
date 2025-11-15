@@ -1,79 +1,73 @@
-// frontend/src/app/dashboard/page.tsx
-
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
+import React from 'react';
 
-export default function DashboardPage() {
-  const { user, logout, isLoading } = useAuth();
-  const router = useRouter();
+// --- Placeholder Components (We can build these out later) ---
 
-  const handleLogout = async () => {
-    await logout();
-    router.push('/login');
-  };
-
-  if (isLoading) {
-    return <div className="p-8 text-center">Loading...</div>;
-  }
-
-  if (!user) {
-    router.push('/login');
-    return null;
-  }
-
+function AdminOverview() {
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome, {user.first_name || user.email}!
-          </h1>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700"
-          >
-            Logout
+    <div>
+      <h1 className="text-3xl font-bold text-gray-900">Admin Overview</h1>
+      <p className="mt-2 text-lg text-gray-600">Welcome back, Admin!</p>
+      {/* TODO: Add stat cards for "Users to Approve", "Total Meals", etc. */}
+    </div>
+  );
+}
+
+function StudentOverview() {
+  return (
+    <div>
+      <h1 className="text-3xl font-bold text-gray-900">Student Overview</h1>
+      <p className="mt-2 text-lg text-gray-600">Welcome back!</p>
+      
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Meal Status Card */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold text-gray-900">Your Meal Status</h2>
+          <p className="mt-4 text-5xl font-bold text-green-600">ON</p>
+          <button className="mt-6 w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+            Turn Meal OFF
           </button>
         </div>
-
-        <div className="mt-6 border-t pt-6">
-          <h2 className="text-xl font-semibold">Your Details</h2>
-          <ul className="mt-4 space-y-2">
-            <li>
-              <strong>Email:</strong> {user.email}
-            </li>
-            <li>
-              <strong>Role:</strong> {user.role}
-            </li>
-            <li>
-              <strong>Account Status:</strong>
-              {user.is_approved ? (
-                <span className="ml-2 px-2 py-1 bg-green-200 text-green-800 text-xs font-medium rounded-full">
-                  Approved
-                </span>
-              ) : (
-                <span className="ml-2 px-2 py-1 bg-yellow-200 text-yellow-800 text-xs font-medium rounded-full">
-                  Pending Approval
-                </span>
-              )}
-            </li>
-          </ul>
+        
+        {/* Wallet Card */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold text-gray-900">Your Wallet</h2>
+          <p className="mt-4 text-5xl font-bold text-gray-800">$12.50</p>
+           <button className="mt-6 w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+            Recharge Wallet
+          </button>
         </div>
-        
-        {user.role === 'STUDENT' && (
-          <div className="mt-6 p-4 bg-blue-50 rounded-md">
-            <h3 className="text-lg font-medium text-blue-800">Student Menu</h3>
-          </div>
-        )}
-        
-        {user.role === 'ADMIN' && (
-          <div className="mt-6 p-4 bg-gray-50 rounded-md">
-            <h3 className="text-lg font-medium text-gray-800">Admin Menu</h3>
-          </div>
-        )}
       </div>
     </div>
   );
+}
+
+function StaffOverview() {
+  return (
+    <div>
+      <h1 className="text-3xl font-bold text-gray-900">Kitchen Staff Overview</h1>
+      <p className="mt-2 text-lg text-gray-600">Here's the plan for today.</p>
+      {/* TODO: Add stat cards for "Lunch Count", "Dinner Count", etc. */}
+    </div>
+  );
+}
+
+// --- Main Dashboard Page ---
+export default function DashboardPage() {
+  const { user } = useAuth();
+
+  // Render the correct overview based on the user's role
+  switch (user?.role) {
+    case 'ADMIN':
+      return <AdminOverview />;
+    case 'STUDENT':
+      return <StudentOverview />;
+    case 'STAFF':
+      return <StaffOverview />;
+    default:
+      // Fallback in case user is null or role is unknown
+      return <div className="text-gray-900">Loading...</div>;
+  }
 }
