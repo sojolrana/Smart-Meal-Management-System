@@ -3,7 +3,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth, User } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { ReactNode } from 'react';
 
@@ -15,6 +15,51 @@ function NavLink({ href, children }: { href: string; children: ReactNode }) {
     >
       {children}
     </Link>
+  );
+}
+
+function PendingApprovalPage({
+  user,
+  handleLogout,
+}: {
+  user: User;
+  handleLogout: () => void;
+}) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md text-center">
+        <h1 className="text-3xl font-bold text-gray-900">
+          Account Pending Approval
+        </h1>
+        <p className="mt-4 text-lg text-gray-600">
+          Your account has been registered successfully. An administrator will
+          review and approve your account soon.
+        </p>
+        
+        <div className="mt-6 border-t pt-6 text-left space-y-3">
+          <h2 className="text-xl font-semibold text-gray-900">Your Details</h2>
+          <div className="flex justify-between">
+            <span className="font-medium text-gray-600">Email:</span>
+            <span className="text-gray-800">{user.email}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium text-gray-600">Full Name:</span>
+            <span className="text-gray-800">{user.first_name} {user.last_name}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium text-gray-600">Role:</span>
+            <span className="text-gray-800">{user.role}</span>
+          </div>
+        </div>
+
+        <button
+          onClick={handleLogout}
+          className="mt-8 w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -40,6 +85,12 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
     return null;
   }
 
+  if (!user.is_approved) {
+    return (
+      <PendingApprovalPage user={user} handleLogout={handleLogout} />
+    );
+  }
+  
   return (
     <div className="min-h-screen flex">
       <div className="w-64 bg-gray-900 text-white flex flex-col">

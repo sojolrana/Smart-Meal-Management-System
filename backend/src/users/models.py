@@ -3,7 +3,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
-
 from .managers import CustomUserManager
 
 class User(AbstractUser):
@@ -15,8 +14,7 @@ class User(AbstractUser):
     username = None
     email = models.EmailField(_("email address"), unique=True)
     
-    base_role = Role.ADMIN
-    role = models.CharField(max_length=50, choices=Role.choices)
+    role = models.CharField(max_length=50, choices=Role.choices, default=Role.ADMIN)
 
     is_approved = models.BooleanField(default=False)
 
@@ -24,11 +22,6 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
 
     objects = CustomUserManager()
-
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            self.role = self.base_role
-        return super().save(*args, **kwargs)
 
 class StudentProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
