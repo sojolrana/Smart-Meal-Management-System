@@ -45,11 +45,12 @@ services:
     image: nginx:alpine
     container_name: meal_nginx_prod 
     volumes:
-      # 2. Mount your *local* nginx.conf, which we know is correct for proxying
+      # 2. Mount your nginx.conf file. This file now has the
+      #    correct /usr/share/nginx/html/static/ path.
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       # 3. Mount the static and media volumes (this fixes CSS)
-      - static_files_prod:/app/staticfiles:ro
-      - media_files_prod:/app/mediafiles:ro
+      - static_files_prod:/usr/share/nginx/html/static:ro
+      - media_files_prod:/usr/share/nginx/html/media:ro
     depends_on:
       - backend
       - frontend
