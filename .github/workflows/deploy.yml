@@ -44,31 +44,21 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }} # Must be 'root'
+          username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            # Set the explicit path for the 'root' user
             PROJECT_DIR="/root/smart-meal-system"
             
-            # Go to the directory (we know it exists now)
             cd $PROJECT_DIR
             
-            # 1. Pull the latest code from GitHub
             git pull origin main
             
-            # 2. Create the .env.prod file from the GitHub secret
             echo "${{ secrets.ENV_FILE_PROD }}" > .env.prod
             
-            # --- THIS IS THE FIX ---
-            # 3. Replace the placeholder with the actual username
-            #    (Looking for DOCKER_USERNAME_PLACEHOLDER now)
-            sed -i 's|DOCKER_USERNAME_PLACEHOLDER|${{ secrets.DOCKER_USERNAME }}|g' docker-compose.prod.yml
+            sed -i 's|sojolrana|${{ secrets.DOCKER_USERNAME }}|g' docker-compose.prod.yml
             
-            # 4. Pull the new *images*
             docker-compose -f docker-compose.prod.yml pull
             
-            # 5. Stop, remove, and restart all services
             docker-compose -f docker-compose.prod.yml up -d --build --force-recreate
             
-            # 6. Clean up old, unused images
             docker image prune -a -f
