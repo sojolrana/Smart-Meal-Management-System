@@ -34,6 +34,11 @@ jobs:
           file: ./frontend/Dockerfile.prod
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/meal-frontend:latest
+          # --- THIS IS THE FIX ---
+          # This injects the secret as a build argument
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+          # --- END OF FIX ---
 
   deploy:
     name: Deploy to DigitalOcean
@@ -47,7 +52,6 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            # Exit immediately if a command exits with a non-zero status.
             set -e
             
             PROJECT_DIR="/root/smart-meal-system"
@@ -55,15 +59,8 @@ jobs:
             echo "--- Navigating to $PROJECT_DIR ---"
             cd $PROJECT_DIR
             
-            # --- THIS IS THE FIX ---
-            echo "--- Fetching all changes from GitHub ---"
-            git fetch --all
-            
-            echo "--- Force-resetting local files to match GitHub ---"
-            # This deletes all local changes (like the 'sed' one)
-            # and pulls the latest version.
-            git reset --hard origin/main
-            # --- END OF FIX ---
+            echo "--- Pulling latest code from GitHub ---"
+            git pull origin main
             
             echo "--- Creating .env.prod file ---"
             echo "${{ secrets.ENV_FILE_PROD }}" > .env.prod
