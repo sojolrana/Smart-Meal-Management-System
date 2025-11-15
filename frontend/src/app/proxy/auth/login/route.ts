@@ -2,9 +2,8 @@ import { NextResponse } from 'next/server';
 import { serialize } from 'cookie';
 
 // --- THIS IS THE FIX ---
-// Point directly to the backend service.
-// The frontend container can see the backend container on their shared network.
-const API_URL = 'http://backend:8000/api';
+// The API_URL is just the hostname and port.
+const API_URL = 'http://backend:8000';
 // --- END OF FIX ---
 
 export async function POST(request: Request) {
@@ -12,8 +11,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, password } = body;
 
-    // 1. Forward the login request to the Django API
-    const apiResponse = await fetch(`${API_URL}/auth/token/`, {
+    // This will now correctly fetch: http://backend:8000/api/auth/token/
+    const apiResponse = await fetch(`${API_URL}/api/auth/token/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -21,16 +20,27 @@ export async function POST(request: Request) {
       body: JSON.stringify({ email, password }),
     });
 
-    // 2. Check if the login was successful
     if (!apiResponse.ok) {
-      const errorData = await apiResponse.json();
-      return NextResponse.json(
-        { error: errorData.detail || 'Login failed' },
-        { status: apiResponse.status }
-      );
+      // --- DEBUGGING STEP ---
+      // If it still fails, this will log the HTML
+      const errorText = await apiResponse.text();
+      console.error("Django API Error:", errorText);
+      try {
+        // Try to parse it as JSON
+        const errorData = JSON.parse(errorText);
+        return NextResponse.json(
+          { error: errorData.detail || 'Login failed' },
+          { status: apiResponse.status }
+        );
+      } catch (e) {
+        // If it fails, return the raw text
+        return NextResponse.json(
+          { error: "Received non-JSON response from backend", details: errorText },
+          { status: apiResponse.status }
+        );
+      }
     }
 
-    // 3. Extract the tokens from the successful Django response
     const { access, refresh } = await apiResponse.json();
 
     if (!access || !refresh) {
@@ -40,7 +50,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. Set the tokens as secure httpOnly cookies
     const accessTokenCookie = serialize('access_token', access, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -55,7 +64,6 @@ export async function POST(request: Request) {
       path: '/',
     });
 
-    // 5. Send a success response
     const response = NextResponse.json(
       { message: 'Login successful' },
       { status: 200 }

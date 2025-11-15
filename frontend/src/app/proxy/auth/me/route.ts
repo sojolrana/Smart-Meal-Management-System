@@ -2,13 +2,11 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
 // --- THIS IS THE FIX ---
-// Point directly to the backend service.
-const API_URL = 'http://backend:8000/api';
+const API_URL = 'http://backend:8000';
 // --- END OF FIX ---
 
 export async function GET(request: Request) {
   try {
-    // 1. Get the access token from the browser's cookies
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('access_token')?.value;
 
@@ -16,8 +14,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Not authorized' }, { status: 401 });
     }
 
-    // 2. Forward the request to the Django 'me' endpoint
-    const apiResponse = await fetch(`${API_URL}/auth/me/`, {
+    // This will now correctly fetch: http://backend:8000/api/auth/me/
+    const apiResponse = await fetch(`${API_URL}/api/auth/me/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -32,7 +30,6 @@ export async function GET(request: Request) {
       );
     }
 
-    // 3. Return the user data
     const userData = await apiResponse.json();
     return NextResponse.json(userData, { status: 200 });
 
