@@ -1,15 +1,17 @@
-// frontend/src/app/proxy/auth/login/route.ts
-
 import { NextResponse } from 'next/server';
 import { serialize } from 'cookie';
 
-const API_URL = 'http://nginx/api';
+// --- THIS IS THE FIX ---
+// Use this project's own Nginx container hostname
+const API_URL = 'http://meal_nginx_prod/api';
+// --- END OF FIX ---
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { email, password } = body;
 
+    // 1. Forward the login request to the Django API
     const apiResponse = await fetch(`${API_URL}/auth/token/`, {
       method: 'POST',
       headers: {
@@ -18,6 +20,7 @@ export async function POST(request: Request) {
       body: JSON.stringify({ email, password }),
     });
 
+    // 2. Check if the login was successful
     if (!apiResponse.ok) {
       const errorData = await apiResponse.json();
       return NextResponse.json(
@@ -26,6 +29,7 @@ export async function POST(request: Request) {
       );
     }
 
+    // 3. Extract the tokens from the successful Django response
     const { access, refresh } = await apiResponse.json();
 
     if (!access || !refresh) {
@@ -35,6 +39,7 @@ export async function POST(request: Request) {
       );
     }
 
+    // 4. Set the tokens as secure httpOnly cookies
     const accessTokenCookie = serialize('access_token', access, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -49,6 +54,7 @@ export async function POST(request: Request) {
       path: '/',
     });
 
+    // 5. Send a success response
     const response = NextResponse.json(
       { message: 'Login successful' },
       { status: 200 }

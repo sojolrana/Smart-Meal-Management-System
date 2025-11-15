@@ -1,12 +1,14 @@
-// frontend/src/app/proxy/auth/me/route.ts
-
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const API_URL = 'http://nginx/api';
+// --- THIS IS THE FIX ---
+// Use this project's own Nginx container hostname
+const API_URL = 'http://meal_nginx_prod/api';
+// --- END OF FIX ---
 
 export async function GET(request: Request) {
   try {
+    // 1. Get the access token from the browser's cookies
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('access_token')?.value;
 
@@ -14,6 +16,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Not authorized' }, { status: 401 });
     }
 
+    // 2. Forward the request to the Django 'me' endpoint
     const apiResponse = await fetch(`${API_URL}/auth/me/`, {
       method: 'GET',
       headers: {
@@ -29,6 +32,7 @@ export async function GET(request: Request) {
       );
     }
 
+    // 3. Return the user data
     const userData = await apiResponse.json();
     return NextResponse.json(userData, { status: 200 });
 
