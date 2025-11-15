@@ -1,3 +1,5 @@
+// frontend/src/app/proxy/auth/me/route.ts
+
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
@@ -12,16 +14,14 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Not authorized' }, { status: 401 });
     }
     
-    // --- THIS IS THE FIX ---
     const host = request.headers.get('host');
-    // --- END OF FIX ---
 
     const apiResponse = await fetch(`${API_URL}/api/auth/me/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${accessToken}`,
-        'Host': host || 'meal.sojolrana.com', // Pass the original host
+        'Host': host || 'meal.sojolrana.com',
       },
     });
 

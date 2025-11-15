@@ -1,3 +1,5 @@
+// frontend/src/app/proxy/auth/refresh/route.ts
+
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { serialize } from 'cookie';
@@ -13,20 +15,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No refresh token found' }, { status: 401 });
     }
     
-    // --- THIS IS THE FIX ---
     const host = request.headers.get('host');
-    // --- END OF FIX ---
 
     const apiResponse = await fetch(`${API_URL}/api/auth/token/refresh/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Host': host || 'meal.sojolrana.com', // Pass the original host
+        'Host': host || 'meal.sojolrana.com',
       },
       body: JSON.stringify({ refresh: refreshToken }),
     });
 
-    // ... (rest of file is unchanged) ...
     if (!apiResponse.ok) {
       const errorData = await apiResponse.json();
       const response = NextResponse.json(

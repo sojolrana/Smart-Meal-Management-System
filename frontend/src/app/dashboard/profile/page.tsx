@@ -1,3 +1,5 @@
+// frontend/src/app/dashboard/profile/page.tsx
+
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
@@ -23,11 +25,9 @@ export default function ProfilePage() {
         This is your personal information.
       </p>
 
-      {/* --- White Card for Details --- */}
       <div className="mt-6 bg-white p-6 rounded-lg shadow-md max-w-2xl">
         <h2 className="text-xl font-semibold text-gray-900">Your Details</h2>
         
-        {/* --- FIX: Added text-gray-800 for readability --- */}
         <ul className="mt-4 space-y-3 text-gray-800">
           <li className="flex justify-between">
             <span className="font-medium text-gray-600">Email:</span>

@@ -1,3 +1,5 @@
+// frontend/src/app/proxy/auth/login/route.ts
+
 import { NextResponse } from 'next/server';
 import { serialize } from 'cookie';
 
@@ -8,16 +10,13 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, password } = body;
     
-    // --- THIS IS THE FIX ---
-    // Get the original Host header from the browser's request
     const host = request.headers.get('host');
-    // --- END OF FIX ---
 
     const apiResponse = await fetch(`${API_URL}/api/auth/token/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Host': host || 'meal.sojolrana.com', // Pass the original host
+        'Host': host || 'meal.sojolrana.com',
       },
       body: JSON.stringify({ email, password }),
     });
@@ -39,7 +38,6 @@ export async function POST(request: Request) {
       }
     }
 
-    // ... (rest of file is unchanged) ...
     const { access, refresh } = await apiResponse.json();
 
     if (!access || !refresh) {

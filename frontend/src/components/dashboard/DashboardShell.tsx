@@ -1,3 +1,5 @@
+// frontend/src/components/dashboard/DashboardShell.tsx
+
 'use client';
 
 import Link from 'next/link';
@@ -5,9 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { ReactNode } from 'react';
 
-// --- Helper: Navigation Link Component ---
 function NavLink({ href, children }: { href: string; children: ReactNode }) {
-  // TODO: Add 'active' state styling later based on usePathname()
   return (
     <Link
       href={href}
@@ -18,7 +18,6 @@ function NavLink({ href, children }: { href: string; children: ReactNode }) {
   );
 }
 
-// --- The Main Dashboard Shell ---
 export default function DashboardShell({ children }: { children: ReactNode }) {
   const { user, logout, isLoading } = useAuth();
   const router = useRouter();
@@ -28,7 +27,6 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
     router.push('/login');
   };
 
-  // If we're loading auth or the user isn't logged in, redirect
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-100">
@@ -44,18 +42,15 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen flex">
-      {/* --- Sidebar --- */}
       <div className="w-64 bg-gray-900 text-white flex flex-col">
         <div className="px-4 py-5 border-b border-gray-700">
           <h1 className="text-xl font-bold">Dashboard</h1>
           <span className="text-sm text-gray-400">{user.role}</span>
         </div>
         
-        {/* Navigation Links */}
         <nav className="flex-1 px-2 py-4 space-y-1">
           <NavLink href="/dashboard">Overview</NavLink>
           
-          {/* Role-Specific Links */}
           {user.role === 'ADMIN' && (
             <>
               <NavLink href="/dashboard/users">Manage Users</NavLink>
@@ -78,7 +73,6 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
           <NavLink href="/dashboard/profile">My Profile</NavLink>
         </nav>
         
-        {/* Logout Button */}
         <div className="px-2 py-4 border-t border-gray-700">
           <button
             onClick={handleLogout}
@@ -89,9 +83,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
         </div>
       </div>
 
-      {/* --- Main Content Area --- */}
       <div className="flex-1 bg-gray-100">
-        {/* We add a 'p-8' (padding) to give content breathing room */}
         <main className="p-8">
           {children}
         </main>

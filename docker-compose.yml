@@ -1,3 +1,5 @@
+# docker-compose.yml
+
 services:
   db:
     image: postgres:16-alpine
@@ -23,8 +25,6 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend/src:/app
-      # --- FIX ---
-      # We need separate dev volumes to match Nginx
       - media_files_dev:/app/mediafiles
       - static_files_dev:/app/staticfiles
     ports:
@@ -52,17 +52,12 @@ services:
       - smart-meal-net
       
   nginx:
-    # --- FIX ---
-    # Use the official image
     image: nginx:alpine
     container_name: meal_nginx
     ports:
       - "80:80"
     volumes:
-      # Mount the config file
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      # Mount the dev volumes. The paths inside Nginx
-      # will now match the prod paths, making the config reusable.
       - media_files_dev:/usr/share/nginx/html/media:ro
       - static_files_dev:/usr/share/nginx/html/static:ro
     depends_on:
@@ -77,7 +72,5 @@ networks:
 
 volumes:
   postgres_data:
-  # --- FIX ---
-  # Define the new dev volumes
   media_files_dev:
   static_files_dev:

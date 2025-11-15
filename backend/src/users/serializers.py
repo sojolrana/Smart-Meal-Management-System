@@ -1,10 +1,10 @@
+# backend/src/users/serializers.py
+
 from django.db import transaction
 from rest_framework import serializers
-# --- ADD THIS IMPORT ---
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import User, StudentProfile, StaffProfile
 
-# --- NEW CLASS (ADD THIS) ---
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     """
     Custom token serializer to add our 'is_approved' check.
@@ -12,24 +12,17 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-        # You could add custom claims here if you wanted
-        # token['first_name'] = user.first_name
         return token
 
     def validate(self, attrs):
-        # Run the default validation first (checks is_active and password)
         data = super().validate(attrs)
 
-        # 'self.user' is the user object that was successfully authenticated
-        # Now, we add our custom check.
         if not self.user.is_approved:
             raise serializers.ValidationError(
                 "Account not yet approved by admin. Please wait for approval."
             )
         
         return data
-# --- END OF NEW CLASS ---
-
 
 class StudentProfileSerializer(serializers.ModelSerializer):
     class Meta:
