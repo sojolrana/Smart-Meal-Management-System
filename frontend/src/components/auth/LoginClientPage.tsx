@@ -22,7 +22,9 @@ export default function LoginClientPage() {
       await login({ email, password });
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err.message || 'An unknown error occurred.');
+      console.error("Login Error Caught:", err);
+      const message = err.message || 'An unknown error occurred.';
+      setError(message);
     }
   };
 
@@ -83,7 +85,7 @@ export default function LoginClientPage() {
       </div>
 
       {error && (
-        <div className="p-3 text-sm text-red-700 bg-red-100 rounded-md">
+        <div className="p-3 text-sm text-red-700 bg-red-100 rounded-md border border-red-200">
           {error}
         </div>
       )}
