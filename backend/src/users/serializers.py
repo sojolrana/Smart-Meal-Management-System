@@ -6,33 +6,24 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import User, StudentProfile, StaffProfile
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    """
-    Custom token serializer to add our 'is_approved' check.
-    """
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
+        token['is_approved'] = user.is_approved
+        token['role'] = user.role
         return token
-
-    def validate(self, attrs):
-        data = super().validate(attrs)
-
-        if not self.user.is_approved:
-            raise serializers.ValidationError(
-                {"detail": "Account not yet approved by admin. Please wait for approval."}
-            )
-        
-        return data
 
 class StudentProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentProfile
         fields = ['student_id', 'department_name', 'father_name', 'mother_name', 'phone_number', 'photo', 'id_card']
 
+
 class StaffProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = StaffProfile
         fields = ['staff_id', 'phone_number']
+
 
 class StudentSignUpSerializer(serializers.ModelSerializer):
     student_id = serializers.CharField(write_only=True, required=True)
@@ -81,6 +72,7 @@ class StudentSignUpSerializer(serializers.ModelSerializer):
         
         return user
 
+
 class StaffSignUpSerializer(serializers.ModelSerializer):
     profile = StaffProfileSerializer(required=True, write_only=True)
 
@@ -107,6 +99,7 @@ class StaffSignUpSerializer(serializers.ModelSerializer):
         )
         
         return user
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
