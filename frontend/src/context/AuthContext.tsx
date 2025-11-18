@@ -36,6 +36,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -53,7 +54,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (credentials: LoginCredentials) => {
-    setIsLoading(true);
     try {
       await apiLogin(credentials);
       
@@ -63,21 +63,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       setUser(null);
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const logout = async () => {
-    setIsLoading(true);
     try {
       await apiLogout();
       setUser(null);
     } catch (error) {
       console.error('Logout failed:', error);
       setUser(null);
-    } finally {
-      setIsLoading(false);
     }
   };
 
