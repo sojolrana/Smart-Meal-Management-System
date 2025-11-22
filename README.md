@@ -5,7 +5,7 @@ A full-stack, containerized web application designed to modernize meal managemen
 ## 🚀 Live Demo
 
 The project is deployed and live at:
-**[https://meal.projects.sojolrana.com](https://meal.projects.sojolrana.com)**
+**[https://meal.sojolrana.com](https://meal.sojolrana.com)**
 
 ---
 
