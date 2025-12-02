@@ -1,3 +1,5 @@
+# .github/workflows/deploy.yml
+
 name: Deploy Meal System
 
 on:
@@ -56,26 +58,19 @@ jobs:
             echo "--- Navigating to $PROJECT_DIR ---"
             cd $PROJECT_DIR
             
-            # --- THIS IS THE FIX ---
             echo "--- Fetching all changes from GitHub ---"
             git fetch --all
             
             echo "--- Force-resetting local files to match GitHub ---"
-            # This deletes all local changes (like the old sed edit)
             git reset --hard origin/main
             
-            echo "--- Creating .env.prod file ---"
-            # This writes the DB and Django secrets
-            echo "${{ secrets.ENV_FILE_PROD }}" > .env.prod
+            echo "--- Creating .env file ---"
+            echo "${{ secrets.ENV_FILE_PROD }}" > .env
             
-            echo "--- Appending Docker Hub username to .env.prod ---"
-            # This *adds* your Docker Hub username to the .env.prod file
-            echo "DOCKERHUB_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> .env.prod
-            
-            # --- We no longer need the 'sed' command ---
+            echo "--- Appending Docker Hub username to .env ---"
+            echo "DOCKERHUB_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> .env
             
             echo "--- Force-pulling new images from Docker Hub ---"
-            # Docker Compose will now read DOCKERHUB_USERNAME from .env.prod
             docker compose -f docker-compose.prod.yml pull
             
             echo "--- Restarting all services ---"
