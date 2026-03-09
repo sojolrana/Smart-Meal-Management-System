@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen Dashboard | Smart Meal Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        html, body { height: 100%; }
+        body { background-color: #f8f9fa; font-family: sans-serif; display: flex; flex-direction: column; padding-top: 80px; }
+        .stat-large { font-size: 3.5rem; font-weight: bold; }
+        .nav-tabs .nav-link { color: #495057; }
+        .nav-tabs .nav-link.active { font-weight: bold; color: #0d6efd; }
+        .profile-field-bg { background-color: #e9ecef; }
+        .profile-field-bg:focus { background-color: #e9ecef !important; }
+    </style>
+</head>
+<body>
+
+    <div id="navbar-container"></div>
+
+    <div class="container pb-5 flex-grow-1">
+        
+        <div id="noticeSection" class="mb-4"></div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="kitchenTabs" role="tablist">
+                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-overview">Overview</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-check">Check User</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-menu">Update Menu</button></li>
+                </ul>
+            </div>
+            
+            <div class="card-body">
+                <div class="tab-content">
+                    
+                    <div class="tab-pane fade show active" id="tab-overview">
+                        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                            <div>
+                                <h3 class="fw-bold mb-0 text-secondary">Meal Overview</h3>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <small class="text-muted">Target:</small>
+                                    <input type="date" id="overviewDate" class="form-control form-control-sm" style="width: auto;">
+                                    <button onclick="loadKitchenStats()" class="btn btn-sm btn-outline-primary">Load</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100 shadow-sm">
+                                    <div class="card-body text-center p-4">
+                                        <h6 class="fw-bold text-muted">Total Meals Enabled</h6>
+                                        <div class="stat-large my-3 text-secondary" id="totalMeals">0</div>
+                                        <div class="text-muted small">Includes Guest Meals</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100 shadow-sm">
+                                    <div class="card-header fw-bold">Quick Summary</div>
+                                    <div class="card-body">
+                                        <ul class="list-group list-group-flush bg-transparent">
+                                            <li class="list-group-item bg-transparent d-flex justify-content-between px-0">
+                                                <span>Students ON</span>
+                                                <span class="fw-bold text-success" id="cntOn">0</span>
+                                            </li>
+                                            <li class="list-group-item bg-transparent d-flex justify-content-between px-0">
+                                                <span>Students OFF</span>
+                                                <span class="fw-bold text-danger" id="cntOff">0</span>
+                                            </li>
+                                            <li class="list-group-item bg-transparent d-flex justify-content-between px-0">
+                                                <span>Rice Estimate (200g/p)</span>
+                                                <span class="fw-bold text-primary" id="estRice">0 kg</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card shadow-sm">
+                            <div class="card-header fw-bold d-flex justify-content-between align-items-center">
+                                <span>Student Meal Status</span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <small class="text-muted">Filter:</small>
+                                    <select id="kitchenFilter" class="form-select form-select-sm" style="width: auto;" onchange="renderKitchenTable()">
+                                        <option value="all">All</option>
+                                        <option value="on">ON</option>
+                                        <option value="off">OFF</option>
+                                    </select>
+                                    <button class="btn btn-sm btn-danger fw-bold" onclick="exportMealPDF()">
+                                        <i class="bi bi-file-earmark-pdf"></i> PDF
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="p-2 border-bottom bg-light small fw-bold">
+                                    Date: <span id="displayDate" class="text-dark">...</span>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover mb-0" style="table-layout: fixed; width: 100%;">
+                                        <thead class="table-dark sticky-top">
+                                            <tr>
+                                                <th style="width: 35%;">Name</th>
+                                                <th style="width: 20%;">ID</th>
+                                                <th style="width: 25%;">Dept</th>
+                                                <th style="width: 20%;">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="studentTableBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="tab-check">
+                        <div class="row justify-content-center">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <h5 class="fw-bold mb-3">Check Individual Status</h5>
+                                        <form id="checkUserForm">
+                                            <div class="mb-2 text-start">
+                                                <label class="small fw-bold">Student ID</label>
+                                                <input type="text" id="chkStudentId" class="form-control" required placeholder="e.g. 1904001">
+                                            </div>
+                                            <div class="mb-3 text-start">
+                                                <label class="small fw-bold">Date</label>
+                                                <input type="date" id="chkDate" class="form-control" required>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary w-100">Check Status</button>
+                                        </form>
+                                        <div id="chkResult" class="mt-3"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="tab-menu">
+                        <div class="card mb-4 shadow-sm">
+                            <div class="card-header fw-bold">
+                                Set Menu for <span id="menuDateDisplay">...</span>
+                            </div>
+                            <div class="card-body">
+                                <form id="menuForm" class="row g-2">
+                                    <div class="col-md-6"><label class="small fw-bold">Lunch</label><input type="text" id="inLunch" class="form-control" placeholder="e.g. Chicken Curry"></div>
+                                    <div class="col-md-6"><label class="small fw-bold">Dinner</label><input type="text" id="inDinner" class="form-control" placeholder="e.g. Fish & Rice"></div>
+                                    <div class="col-12"><button type="submit" class="btn btn-primary w-100 mt-2">Update Menu</button></div>
+                                </form>
+                                <div id="menuMsg" class="mt-2 text-center small fw-bold"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="profileModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">My Profile (Kitchen Staff)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="profileForm">
+                        <div class="row g-3">
+                            <div class="col-md-6"><label class="form-label small fw-bold">Full Name</label><input type="text" id="k_name" class="form-control profile-field-bg" readonly></div>
+                            <div class="col-md-6"><label class="form-label small fw-bold">Hall Name</label><input type="text" id="k_hall" class="form-control profile-field-bg" readonly></div>
+                            <div class="col-md-6"><label class="form-label small fw-bold">NID Number</label><input type="text" id="k_nid" class="form-control profile-field-bg" readonly></div>
+                            <div class="col-md-6"><label class="form-label small fw-bold">Phone</label><input type="text" id="k_phone" class="form-control"></div>
+                            
+                            <div class="col-md-6"><label class="form-label small fw-bold">Date of Birth</label><input type="text" id="k_dob" class="form-control profile-field-bg" readonly></div>
+                            <div class="col-md-6"><label class="form-label small fw-bold">Blood Group</label><input type="text" id="k_bg" class="form-control profile-field-bg" readonly></div>
+
+                            <div class="col-md-6"><label class="form-label small fw-bold">Father's Name</label><input type="text" id="k_father" class="form-control profile-field-bg" readonly></div>
+                            <div class="col-md-6"><label class="form-label small fw-bold">Mother's Name</label><input type="text" id="k_mother" class="form-control profile-field-bg" readonly></div>
+                            
+                            <div class="col-md-6"><label class="form-label small fw-bold">Permanent Address</label><textarea id="k_perm_address" class="form-control profile-field-bg" rows="2" readonly></textarea></div>
+                            <div class="col-md-6"><label class="form-label small fw-bold">Present Address</label><textarea id="k_pres_address" class="form-control" rows="2"></textarea></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold mt-4">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="footer-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="navbar.js"></script>
+    <script src="footer.js"></script>
+    <script>
+        function openProfileModal() { new bootstrap.Modal(document.getElementById('profileModal')).show(); }
+        renderNavbar('kitchen'); renderFooter();
+        function logout() { fetch('api/logout.php').then(() => window.location.href = 'login.html'); }
+
+        const tmr = new Date(); tmr.setDate(tmr.getDate()+1);
+        const tmrStr = tmr.toISOString().split('T')[0];
+        document.getElementById('menuDateDisplay').innerText = tmrStr;
+        document.getElementById('overviewDate').value = tmrStr;
+        document.getElementById('chkDate').value = tmrStr;
+
+        let globalKitchenList = [];
+
+        async function checkAuth() {
+            const res = await fetch('api/check_auth.php');
+            const data = await res.json();
+            if (data.status !== 'logged_in' || (data.role !== 'kitchen_staff' && data.role !== 'admin')) window.location.href = 'login.html';
+            else { loadKitchenStats(); loadMenu(); loadNotices(); fetchProfile(); }
+        }
+        checkAuth();
+
+        async function fetchProfile() {
+            const authRes = await fetch('api/check_auth.php'); const authData = await authRes.json();
+            const res = await fetch(`api/get_user_details.php?id=${authData.user_id}`); const r = await res.json();
+            if(r.status === 'success') { 
+                const d = r.details; 
+                document.getElementById('k_name').value = d.full_name; 
+                document.getElementById('k_hall').value = d.hall_name || '-';
+                document.getElementById('k_nid').value = d.nid_number; 
+                document.getElementById('k_phone').value = d.phone; 
+                document.getElementById('k_dob').value = d.dob || '-';
+                document.getElementById('k_bg').value = d.blood_group || '-';
+                document.getElementById('k_father').value = d.father_name; 
+                document.getElementById('k_mother').value = d.mother_name; 
+                document.getElementById('k_perm_address').value = d.permanent_address || '-';
+                document.getElementById('k_pres_address').value = d.present_address || d.address || ''; 
+            }
+        }
+        document.getElementById('profileForm').addEventListener('submit', async function(e){ e.preventDefault(); const data = { phone: document.getElementById('k_phone').value, address: document.getElementById('k_pres_address').value }; const res = await fetch('api/update_profile.php', { method: 'POST', body: JSON.stringify(data) }); const r = await res.json(); alert(r.message); bootstrap.Modal.getInstance(document.getElementById('profileModal')).hide(); });
+
+        async function loadMenu() { const res = await fetch(`api/get_menu.php?date=${tmrStr}`); const result = await res.json(); if(result.status==='success'){ document.getElementById('inLunch').value = result.data.lunch || ""; document.getElementById('inDinner').value = result.data.dinner || ""; } }
+        async function loadNotices() { const res = await fetch('api/get_notices.php'); const r = await res.json(); const div = document.getElementById('noticeSection'); if (r.status === 'success' && r.data.length > 0) { let html = '<div class="card mb-4 shadow-sm"><div class="card-header fw-bold"><i class="bi bi-megaphone-fill me-2 text-primary"></i>Notices</div><ul class="list-group list-group-flush">'; r.data.forEach(n => { html += `<li class="list-group-item"><strong class="d-block text-dark">${n.title}</strong><span class="small text-muted">${n.message}</span></li>`; }); html += '</ul></div>'; div.innerHTML = html; } }
+
+        async function loadKitchenStats() {
+             const date = document.getElementById('overviewDate').value;
+             document.getElementById('displayDate').innerText = date;
+
+             const res = await fetch('api/get_daily_meals.php', { method: 'POST', body: JSON.stringify({date: date}) });
+             const data = await res.json();
+             if(data.status==='success'){
+                 document.getElementById('totalMeals').innerText = data.on_count; 
+                 document.getElementById('cntOn').innerText = data.on_count;
+                 document.getElementById('cntOff').innerText = data.off_count;
+                 document.getElementById('estRice').innerText = (data.on_count * 0.2).toFixed(2) + " kg";
+                 
+                 globalKitchenList = data.list;
+                 renderKitchenTable();
+             }
+        }
+
+        function renderKitchenTable() {
+            const filter = document.getElementById('kitchenFilter').value;
+            const tbody = document.getElementById('studentTableBody');
+            tbody.innerHTML = '';
+
+            const filteredList = globalKitchenList.filter(s => {
+                if(filter === 'all') return true;
+                if(filter === 'on') return s.status == 1;
+                if(filter === 'off') return s.status == 0;
+            });
+
+            if(filteredList.length > 0) {
+                filteredList.forEach(s => {
+                    let badge = s.status == 1 ? '<span class="badge bg-success">ON</span>' : '<span class="badge bg-secondary">OFF</span>';
+                    tbody.innerHTML += `<tr><td>${s.full_name}</td><td>${s.student_id_no}</td><td>${s.department}</td><td>${badge}</td></tr>`;
+                });
+            } else { tbody.innerHTML = '<tr><td colspan="4" class="text-center p-3">No students found.</td></tr>'; }
+        }
+
+        async function exportMealPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const date = document.getElementById('overviewDate').value;
+            const filter = document.getElementById('kitchenFilter').value;
+            const filterText = filter === 'all' ? "Filter: All Students" : (filter === 'on' ? "Filter: Meal ON" : "Filter: Meal OFF");
+            const pageWidth = doc.internal.pageSize.getWidth();
+
+            const loadImage = (src) => new Promise((resolve) => {
+                const img = new Image();
+                img.src = src;
+                img.onload = () => resolve(img);
+                img.onerror = () => resolve(null);
+            });
+
+            const logo = await loadImage('assets/duet-logo.png');
+
+            if (logo) {
+                doc.addImage(logo, 'PNG', (pageWidth / 2) - 12, 10, 18, 18); 
+            }
+
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "bold");
+            doc.text("Dhaka University of Engineering & Technology, Gazipur", pageWidth / 2, 37, { align: 'center' });
+
+            doc.setFontSize(16);
+            doc.setFont("helvetica", "normal");
+            doc.text("Daily Meal Report", pageWidth / 2, 50, { align: 'center' });
+
+            doc.setFontSize(10);
+            doc.text(filterText, 14, 58); 
+            doc.text(`Date: ${date}`, pageWidth - 14, 58, { align: 'right' });
+
+            const filteredList = globalKitchenList.filter(s => {
+                if (filter === 'all') return true;
+                if (filter === 'on') return s.status == 1;
+                if (filter === 'off') return s.status == 0;
+            });
+
+            doc.text(`Total Students: ${filteredList.length}`, 14, 64);
+
+            const tableData = filteredList.map(s => [
+                s.full_name,
+                s.student_id_no,
+                s.department,
+                s.status == 1 ? "ON" : "OFF"
+            ]);
+
+            doc.autoTable({
+                startY: 70,
+                head: [['Name', 'Student ID', 'Department', 'Status']],
+                body: tableData,
+                theme: 'grid',
+                styles: { fontSize: 10, cellPadding: 2 },
+                headStyles: { fillColor: [41, 128, 185], halign: 'center' },
+                columnStyles: { 3: { halign: 'center' } }
+            });
+
+            doc.save(`Meal_Report_${date}.pdf`);
+        }
+
+        document.getElementById('checkUserForm').addEventListener('submit', async function(e){
+            e.preventDefault();
+            const sid = document.getElementById('chkStudentId').value;
+            const date = document.getElementById('chkDate').value;
+            const res = await fetch('api/check_user_meal.php', { method: 'POST', body: JSON.stringify({student_id: sid, date: date}) });
+            const r = await res.json();
+            const div = document.getElementById('chkResult');
+            if(r.status === 'success') {
+                const statusHtml = r.data.meal_status == 1 ? '<h4 class="text-success fw-bold"><i class="bi bi-check-circle-fill"></i> Meal ON</h4>' : '<h4 class="text-danger fw-bold"><i class="bi bi-x-circle-fill"></i> Meal OFF</h4>';
+                div.innerHTML = `<div class="border rounded p-3 bg-light"><strong>${r.data.name}</strong><br><small class="text-muted">Date: ${r.data.date}</small><div class="mt-2">${statusHtml}</div></div>`;
+            } else { div.innerHTML = `<div class="alert alert-danger">${r.message}</div>`; }
+        });
+        
+        document.getElementById('menuForm').addEventListener('submit', async function(e){ e.preventDefault(); const data = { date: tmrStr, lunch: document.getElementById('inLunch').value, dinner: document.getElementById('inDinner').value }; const res = await fetch('api/save_menu.php', { method: 'POST', body: JSON.stringify(data) }); const result = await res.json(); const msgBox = document.getElementById('menuMsg'); if(result.status === 'success') { msgBox.innerHTML = '<span class="text-success">Saved Successfully!</span>'; } else { msgBox.innerHTML = `<span class="text-danger">${result.message}</span>`; } });
+    </script>
+</body>
+</html>

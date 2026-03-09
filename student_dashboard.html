@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard | Smart Meal Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        html, body { height: 100%; }
+        body { 
+            background-color: #f8f9fa; 
+            font-family: sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            padding-top: 80px;
+        }
+        
+        .profile-img { width: 90px; height: 90px; object-fit: cover; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .calendar-day { border: 1px solid #dee2e6; height: 80px; position: relative; cursor: pointer; background: #fff; }
+        .calendar-day:hover { background-color: #f1f3f5; }
+        .active-meal { background-color: #d1e7dd; border-color: #badbcc; }
+        .inactive-meal { background-color: #f8d7da; border-color: #f5c6cb; }
+        .disabled-day { background-color: #e9ecef; cursor: not-allowed; opacity: 0.6; }
+        .date-num { position: absolute; top: 5px; left: 5px; font-weight: bold; font-size: 0.9rem; }
+        .meal-badge { position: absolute; bottom: 5px; right: 5px; font-size: 0.75rem; font-weight: bold; }
+        .nav-tabs .nav-link { color: #495057; }
+        .nav-tabs .nav-link.active { font-weight: bold; color: #0d6efd; }
+
+        .payment-method-card {
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 5px;
+            text-align: center;
+        }
+        .payment-method-card:hover { border-color: #0d6efd; background-color: #f8f9fa; }
+        .payment-method-card.selected { border-color: #0d6efd; background-color: #e7f1ff; }
+        .payment-logo { height: 50px; width: auto; object-fit: contain; }
+        .profile-field-bg { background-color: #e9ecef; }
+        .profile-field-bg:focus { background-color: #e9ecef !important; }
+    </style>
+</head>
+<body>
+
+    <div id="navbar-container"></div>
+
+    <div class="container pb-5 flex-grow-1">
+        
+        <div class="alert alert-warning border-warning shadow-sm mb-4">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Notice:</strong> আগামীকালের মিল চালু/বন্ধের সর্বশেষ সময় আজ রাত ১০:০০ টা।
+        </div>
+
+        <div id="noticeSection"></div>
+
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body text-center pt-4">
+                        <img id="userPhoto" src="https://via.placeholder.com/150" class="profile-img mb-3">
+                        <h5 id="userName" class="fw-bold text-dark">Loading...</h5>
+                        <p class="text-muted small mb-2" id="studentId">Student ID: ...</p>
+                        <hr>
+                        <div class="mt-3">
+                            <small class="fw-bold text-muted">Wallet Balance</small>
+                            <h3 class="mb-0 text-success fw-bold">৳ <span id="walletBalance">0.00</span></h3>
+                            
+                            <button class="btn btn-sm btn-outline-success fw-bold mt-2 rounded-pill px-3" onclick="openRechargeModal()">
+                                <i class="bi bi-plus-lg me-1"></i>Recharge
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header fw-bold py-3">
+                        Recent Transactions
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-striped mb-0 table-sm" style="font-size: 0.85rem;">
+                            <tbody id="transactionBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header fw-bold py-3">
+                        Tomorrow's Menu
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6 border-end">
+                                <small class="text-muted fw-bold">Lunch</small>
+                                <div class="fs-5" id="viewLunch">-</div>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted fw-bold">Dinner</small>
+                                <div class="fs-5" id="viewDinner">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <ul class="nav nav-tabs card-header-tabs" id="mealTabs" role="tablist">
+                            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-simple">Quick View</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-calendar" onclick="loadCalendar()">Monthly Calendar</button></li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="tab-simple">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <div>
+                                        <span class="badge bg-secondary mb-2">TOMORROW</span>
+                                        <h4 class="fw-bold mb-0" id="dateTomorrow">...</h4>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="form-check form-switch d-inline-block">
+                                            <input class="form-check-input" type="checkbox" id="toggleTomorrow" style="width: 3.5em; height: 2em; cursor: pointer;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-light rounded border text-center">
+                                    <small class="text-muted fw-bold">Current Status</small>
+                                    <h3 class="fw-bold mb-0 mt-1" id="statusTextTomorrow">Loading...</h3>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="tab-calendar">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="fw-bold mb-0" id="calMonthName">Month</h5>
+                                    <small class="text-muted">Click to toggle meals</small>
+                                </div>
+                                <div id="calendarGrid" class="row g-1"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">Guest Meals</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="collapse show mb-3" id="guestBookForm">
+                            <div class="p-3 bg-light rounded border">
+                                <form id="guestForm" class="row g-2 align-items-end">
+                                    <div class="col-md-5"><label class="small fw-bold">Date</label><input type="date" id="guestDate" class="form-control" required></div>
+                                    <div class="col-md-3"><label class="small fw-bold">Guests</label><input type="number" id="guestQty" class="form-control" min="1" max="10" value="1" required></div>
+                                    <div class="col-md-4"><button type="submit" class="btn btn-primary w-100 fw-bold">Confirm (70৳)</button></div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <h6 class="text-secondary small fw-bold border-bottom pb-2">My Active Orders</h6>
+                        <div id="activeGuestsList" class="row g-2"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="profileModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">My Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="profileForm" enctype="multipart/form-data">
+                        <div class="row g-3">
+                            <div class="col-md-4 text-center border-end">
+                                <label class="small fw-bold d-block mb-2">Profile Photo</label>
+                                <img id="p_photo" src="https://via.placeholder.com/150" class="img-thumbnail mb-2" style="width: 150px; height: 150px; object-fit: cover;">
+                                <input type="file" name="photo" id="p_photo_input" class="form-control form-control-sm mb-3" accept="image/*">
+                                <label class="small fw-bold d-block mb-2">ID Card</label>
+                                <img id="p_id_card" src="https://via.placeholder.com/250x150" class="img-fluid border rounded mb-2">
+                                <small class="text-muted d-block fst-italic" style="font-size: 0.75rem;">(ID Card cannot be changed)</small>
+                            </div>
+                            <div class="col-md-8">
+                                <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">Academic Info</h6>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-md-6"><label class="small fw-bold">Full Name</label><input type="text" id="p_name" class="form-control profile-field-bg" readonly ></div>
+                                    <div class="col-md-6"><label class="small fw-bold">Student ID</label><input type="text" id="p_student_id" class="form-control profile-field-bg" readonly></div>
+                                    <div class="col-md-6"><label class="small fw-bold">Registration No</label><input type="text" id="p_reg_no" class="form-control profile-field-bg" readonly></div>
+                                    <div class="col-md-6"><label class="small fw-bold">Department</label><input type="text" id="p_dept" class="form-control profile-field-bg" readonly></div>
+                                    <div class="col-md-6"><label class="small fw-bold">Hall Name</label><input type="text" id="p_hall" class="form-control profile-field-bg" readonly></div>
+                                    <div class="col-md-6"><label class="small fw-bold">Email</label><input type="text" id="p_email" class="form-control profile-field-bg" readonly></div>
+                                </div>
+                                <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">Personal Info</h6>
+                                <div class="row g-2">
+                                    <div class="col-md-4"><label class="small fw-bold">Date of Birth</label><input type="text" id="p_dob" class="form-control profile-field-bg" readonly></div>
+                                    <div class="col-md-4"><label class="small fw-bold">Blood Group</label><input type="text" id="p_bg" class="form-control profile-field-bg" readonly></div>
+                                    <div class="col-md-4"><label class="small fw-bold">Gender</label><input type="text" id="p_gender" class="form-control profile-field-bg" readonly></div>
+                                    
+                                    <div class="col-md-6"><label class="small fw-bold">Father's Name</label><input type="text" id="p_father" class="form-control profile-field-bg" readonly></div>
+                                    <div class="col-md-6"><label class="small fw-bold">Mother's Name</label><input type="text" id="p_mother" class="form-control profile-field-bg" readonly></div>
+                                    
+                                    <div class="col-md-6"><label class="small fw-bold">Permanent Address</label><textarea id="p_perm_address" class="form-control profile-field-bg" rows="1" readonly></textarea></div>
+                                    <div class="col-md-6"><label class="small fw-bold">Present Address</label><textarea name="present_address" id="p_pres_address" class="form-control" rows="1"></textarea></div>
+
+                                    <div class="col-md-12"><label class="small fw-bold">Mobile Number</label>
+                                        <div class="input-group">
+                                            <input type="text" name="phone" id="p_phone" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 text-end"><button type="submit" class="btn btn-primary px-4 fw-bold">Save Changes</button></div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="rechargeModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Add Funds</
+            // 6. Draw Tableh5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="step-method">
+                        <p class="text-center text-muted mb-3 small fw-bold">Select Payment Method</p>
+                        <div class="row g-3">
+                            <div class="col-4">
+                                <div class="payment-method-card" onclick="selectMethod('bkash')">
+                                    <img src="assets/bkash.svg" class="payment-logo" alt="Bkash">
+                                    <div class="small fw-bold mt-2">Bkash</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="payment-method-card" onclick="selectMethod('rocket')">
+                                    <img src="assets/rocket.svg" class="payment-logo" alt="Rocket">
+                                    <div class="small fw-bold mt-2">Rocket</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="payment-method-card" onclick="selectMethod('nagad')">
+                                    <img src="assets/nagad.svg" class="payment-logo" alt="Nagad">
+                                    <div class="small fw-bold mt-2">Nagad</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="step-amount" style="display: none;">
+                        <div class="d-flex align-items-center mb-3">
+                            <button class="btn btn-sm btn-light me-2" onclick="backToMethods()"><i class="bi bi-arrow-left"></i></button>
+                            <span class="fw-bold">Recharge via <span id="selectedMethodName" class="text-primary text-capitalize"></span></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Enter Amount (BDT)</label>
+                            <input type="number" id="rechargeAmount" class="form-control form-control-lg text-center " placeholder="500">
+                        </div>
+                        <button class="btn btn-success w-100 fw-bold py-2" onclick="processRecharge()">Confirm Payment</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="navbar.js"></script>
+    <script src="footer.js"></script>
+    <script>
+        function openProfileModal() {
+            new bootstrap.Modal(document.getElementById('profileModal')).show();
+        }
+
+        let selectedPaymentMethod = '';
+        const rechargeModal = new bootstrap.Modal(document.getElementById('rechargeModal'));
+
+        function openRechargeModal() {
+            document.getElementById('step-method').style.display = 'block';
+            document.getElementById('step-amount').style.display = 'none';
+            rechargeModal.show();
+        }
+
+        function selectMethod(method) {
+            selectedPaymentMethod = method;
+            document.getElementById('selectedMethodName').innerText = method;
+            document.getElementById('step-method').style.display = 'none';
+            document.getElementById('step-amount').style.display = 'block';
+            document.getElementById('rechargeAmount').value = '';
+            document.getElementById('rechargeAmount').focus();
+        }
+
+        function backToMethods() {
+            document.getElementById('step-method').style.display = 'block';
+            document.getElementById('step-amount').style.display = 'none';
+        }
+
+        async function processRecharge() {
+            const amount = document.getElementById('rechargeAmount').value;
+            if(!amount || amount <= 0) { alert("Please enter a valid amount"); return; }
+
+            const btn = document.querySelector('#step-amount button');
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = "Processing...";
+
+            try {
+                const res = await fetch('api/student_recharge.php', {
+                    method: 'POST',
+                    body: JSON.stringify({ amount: amount, method: selectedPaymentMethod })
+                });
+                const result = await res.json();
+                
+                if(result.status === 'success') {
+                    alert("Recharge Successful!");
+                    rechargeModal.hide();
+                    loadProfileData(); 
+                    loadTransactions(); 
+                } else {
+                    alert("Error: " + result.message);
+                }
+            } catch (err) { alert("System Error"); }
+            
+            btn.disabled = false;
+            btn.innerText = originalText;
+        }
+
+        renderNavbar('student');
+        renderFooter();
+
+        function logout() { fetch('api/logout.php').then(() => window.location.href = 'login.html'); }
+
+        let globalDates = {};
+        let serverToday = "";
+        let serverTomorrow = "";
+
+        async function checkAuth() {
+            const res = await fetch('api/check_auth.php');
+            const data = await res.json();
+            if (data.status !== 'logged_in' || data.role !== 'student') window.location.href = 'login.html';
+            else { loadProfileData(); loadStudentMenu(); loadTransactions(); loadNotices(); }
+        }
+        checkAuth();
+
+        async function loadProfileData() {
+            const res = await fetch('api/get_profile.php');
+            const r = await res.json();
+            if (r.status === 'success') {
+                const s = r.data;
+                const timestamp = new Date().getTime(); 
+
+                document.getElementById('userName').innerText = s.full_name;
+                document.getElementById('studentId').innerText = 'Student ID: ' + s.student_id_no;
+                document.getElementById('walletBalance').innerText = s.wallet_balance;
+                if (s.photo_path) document.getElementById('userPhoto').src = s.photo_path + '?t=' + timestamp;
+
+                document.getElementById('p_name').value = s.full_name;
+                document.getElementById('p_student_id').value = s.student_id_no;
+                document.getElementById('p_reg_no').value = s.registration_no || '-';
+                document.getElementById('p_dept').value = s.department;
+                document.getElementById('p_hall').value = s.hall_name || '-';
+                document.getElementById('p_email').value = s.email || 'N/A'; 
+                document.getElementById('p_dob').value = s.dob || '-';
+                document.getElementById('p_bg').value = s.blood_group || '-';
+                document.getElementById('p_gender').value = s.gender || '-';
+                document.getElementById('p_father').value = s.father_name || '';
+                document.getElementById('p_mother').value = s.mother_name || '';
+                document.getElementById('p_perm_address').value = s.permanent_address || '';
+                document.getElementById('p_pres_address').value = s.present_address || s.address || '';
+                document.getElementById('p_phone').value = s.phone || '';
+                
+                if (s.photo_path) document.getElementById('p_photo').src = s.photo_path + '?t=' + timestamp;
+                if (s.id_card_path) document.getElementById('p_id_card').src = s.id_card_path;
+
+                globalDates = r.dates;
+                serverToday = r.dates.today;
+                serverTomorrow = r.dates.tomorrow;
+
+                document.getElementById('dateTomorrow').innerText = r.dates.tomorrow;
+                setupToggle('toggleTomorrow', 'statusTextTomorrow', r.meal_tomorrow, r.dates.tomorrow);
+
+                document.getElementById('guestDate').min = r.dates.today;
+                document.getElementById('guestDate').value = r.dates.tomorrow;
+
+                const gList = document.getElementById('activeGuestsList');
+                gList.innerHTML = '';
+                if (r.guest_bookings && r.guest_bookings.length > 0) {
+                    r.guest_bookings.forEach(g => {
+                        gList.innerHTML += `
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded bg-white shadow-sm d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold text-primary">${g.booking_date}</div>
+                                    <div class="small text-muted">${g.quantity} Guest(s) • -${g.total_cost}৳</div>
+                                </div>
+                                <button class="btn btn-outline-danger btn-sm" onclick="cancelGuest(${g.id})"><i class="bi bi-x-lg"></i></button>
+                            </div>
+                        </div>`;
+                    });
+                } else { gList.innerHTML = '<div class="col-12 text-muted small text-center py-2">No active guest bookings.</div>'; }
+            }
+        }
+
+        function setupToggle(btnId, textId, status, date) {
+            const btn = document.getElementById(btnId);
+            const text = document.getElementById(textId);
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+
+            newBtn.checked = (status == 1);
+            if (status == 1) {
+                text.innerHTML = '<i class="bi bi-check-circle-fill text-success me-2"></i>Meal ON';
+                text.className = "fw-bold mb-0 text-success";
+            } else {
+                text.innerHTML = '<i class="bi bi-x-circle-fill text-danger me-2"></i>Meal OFF';
+                text.className = "fw-bold mb-0 text-danger";
+            }
+            newBtn.addEventListener('change', function () { toggleMeal(this, this.checked, date); });
+        }
+
+        async function toggleMeal(el, isChecked, date) {
+            const res = await fetch('api/toggle_meal.php', { method: 'POST', body: JSON.stringify({ status: isChecked ? 1 : 0, date: date }) });
+            const result = await res.json();
+            if (result.status === 'success') {
+                loadProfileData();
+                if (document.getElementById('tab-calendar').classList.contains('active')) loadCalendar();
+            } else {
+                alert("Error: " + result.message);
+                el.checked = !isChecked;
+            }
+        }
+
+        async function loadCalendar() {
+            if (!serverToday) { console.error("Server dates not loaded yet"); return; }
+            const now = new Date();
+            const month = now.toISOString().slice(0, 7);
+            document.getElementById('calMonthName').innerText = now.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            const res = await fetch(`api/get_month_status.php?month=${month}`);
+            const r = await res.json();
+            const mealData = r.data || {};
+            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                let year = now.getFullYear();
+                let m = (now.getMonth() + 1).toString().padStart(2, '0');
+                let d = i.toString().padStart(2, '0');
+                let dateStr = `${year}-${m}-${d}`;
+
+                let isClickable = (dateStr > serverToday);
+                let status = mealData[dateStr];
+                let colorClass = '';
+                let badge = '';
+
+                if (status == 1) { colorClass = 'active-meal'; badge = '<i class="bi bi-check text-success"></i>'; }
+                else if (status == 0) { colorClass = 'inactive-meal'; badge = '<i class="bi bi-x text-danger"></i>'; }
+
+                if (!isClickable) colorClass += ' disabled-day';
+
+                let clickAction = isClickable ? `onclick="toggleCalendarDate('${dateStr}', ${status == 1 ? 0 : 1})"` : '';
+                let borderStyle = (dateStr === serverToday) ? 'border: 2px solid #0d6efd;' : '';
+
+                grid.innerHTML += `
+                    <div class="col-2 mb-2">
+                        <div class="calendar-day rounded p-1 ${colorClass}" style="${borderStyle}" ${clickAction}>
+                            <span class="date-num">${i}</span>
+                            <span class="meal-badge">${badge}</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function toggleCalendarDate(date, newStatus) {
+            const res = await fetch('api/toggle_meal.php', { method: 'POST', body: JSON.stringify({ status: newStatus, date: date }) });
+            const r = await res.json();
+            if (r.status === 'success') {
+                loadCalendar();
+                if (date === serverTomorrow) loadProfileData();
+            } else { alert(r.message); }
+        }
+
+        document.getElementById('guestForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            if (!confirm("Book these guest meals?")) return;
+            const data = { date: document.getElementById('guestDate').value, quantity: document.getElementById('guestQty').value };
+            const res = await fetch('api/book_guest.php', { method: 'POST', body: JSON.stringify(data) });
+            const r = await res.json();
+            if (r.status === 'success') { alert("Success!"); loadProfileData(); document.getElementById('guestForm').reset(); } else alert(r.message);
+        });
+
+        async function cancelGuest(id) {
+            if (!confirm("Refund money and cancel?")) return;
+            const res = await fetch('api/cancel_guest.php', { method: 'POST', body: JSON.stringify({ booking_id: id }) });
+            alert((await res.json()).message); loadProfileData();
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            try {
+                const response = await fetch('api/update_profile.php', { method: 'POST', body: formData });
+                const result = await response.json();
+                if(result.status === 'success') {
+                    alert("Profile Updated Successfully!");
+                    bootstrap.Modal.getInstance(document.getElementById('profileModal')).hide();
+                    document.getElementById('p_photo_input').value = '';
+                    loadProfileData();
+                } else { alert("Error: " + result.message); }
+            } catch (error) { alert("System error occurred"); }
+        });
+
+        async function loadNotices() { 
+            const res = await fetch('api/get_notices.php'); 
+            const r = await res.json(); 
+            const div = document.getElementById('noticeSection'); 
+            if (r.status === 'success' && r.data.length > 0) { 
+                let html = '<div class="card mb-4 shadow-sm"><div class="card-header fw-bold"><i class="bi bi-megaphone-fill me-2 text-primary"></i>Notices</div><ul class="list-group list-group-flush">'; 
+                r.data.forEach(n => { html += `<li class="list-group-item"><strong class="d-block text-dark">${n.title}</strong><span class="small text-muted">${n.message}</span></li>`; }); 
+                html += '</ul></div>';
+                div.innerHTML = html; 
+            } 
+        }
+
+        async function loadStudentMenu() { 
+            const tmr = new Date(); tmr.setDate(tmr.getDate() + 1); 
+            const dateStr = tmr.toISOString().split('T')[0]; 
+            const res = await fetch(`api/get_menu.php?date=${dateStr}`); 
+            const r = await res.json(); 
+            if (r.status === 'success') { 
+                document.getElementById('viewLunch').innerText = r.data.lunch || "-"; 
+                document.getElementById('viewDinner').innerText = r.data.dinner || "-"; 
+            } 
+        }
+
+        async function loadTransactions() {
+            const res = await fetch('api/get_transactions.php');
+            const r = await res.json();
+            const t = document.getElementById('transactionBody');
+            t.innerHTML = '';
+            if (r.status === 'success') {
+                r.data.forEach(d => {
+                    const color = d.type === 'debit' ? 'text-danger' : 'text-success';
+                    t.innerHTML += `<tr><td class="text-muted px-3">${d.created_at}</td><td>${d.description}</td><td class="${color} fw-bold text-end px-3">${d.type == 'debit' ? '-' : '+'}${d.amount}</td></tr>`;
+                });
+            }
+        }
+    </script>
+</body>
+</html>

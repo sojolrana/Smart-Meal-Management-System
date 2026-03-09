@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Smart Meal Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        html, body { height: 100%; }
+        body { 
+            background-color: #f8f9fa; 
+            font-family: sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            padding-top: 80px; 
+        }
+        .login-card { max-width: 400px; width: 100%; }
+        .brand-icon { font-size: 3rem; color: #0d6efd; }
+    </style>
+</head>
+<body>
+
+    <div id="navbar-container"></div>
+
+    <div class="container d-flex align-items-center justify-content-center flex-grow-1">
+        <div class="card login-card shadow-sm border mb-4 mt-1">
+            <div class="card-body p-4 text-center">
+                <div class="mb-3"><i class="bi bi-person-circle brand-icon"></i></div>
+                <h4 class="fw-bold mb-4">Welcome Back</h4>
+                
+                <form id="loginForm" class="text-start">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Email Address</label>
+                        <input type="email" name="email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label class="form-label small fw-bold text-muted mb-0">Password</label>
+                            <a href="#" class="small text-decoration-none fw-bold" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">Forgot Password?</a>
+                        </div>
+                        <input type="password" name="password" class="form-control mt-2" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 fw-bold py-2 mt-2">Login</button>
+                </form>
+                
+                <div id="alertMessage" class="mt-3 text-center small fw-bold"></div>
+                
+                <div class="mt-4 pt-3 border-top">
+                    <small class="text-muted">Don't have an account? <a href="signup.html" class="text-decoration-none fw-bold">Sign Up</a></small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Reset Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="forgotForm">
+                        <p class="small text-muted mb-3">Enter your registered email address. We will send you instructions to reset your password.</p>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Email Address</label>
+                            <input type="email" id="resetEmail" class="form-control" placeholder="name@example.com" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold">Send Reset Link</button>
+                    </form>
+                    <div id="forgotMsg" class="mt-3 text-center small fw-bold"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer-container" class="mt-auto"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="navbar.js"></script>
+    <script src="footer.js"></script>
+    <script>
+        renderNavbar('guest', 'login');
+        renderFooter();
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const alertBox = document.getElementById('alertMessage');
+            alertBox.innerHTML = '<span class="text-muted">Verifying...</span>';
+            try {
+                const response = await fetch('api/login.php', { method: 'POST', body: formData });
+                const result = await response.json();
+                if(result.status === 'success') {
+                    alertBox.innerHTML = '<span class="text-success fw-bold">Success! Redirecting...</span>';
+                    setTimeout(() => { window.location.href = result.redirect_url; }, 1000);
+                } else {
+                    alertBox.innerHTML = `<span class="text-danger">${result.message}</span>`;
+                }
+            } catch (error) { alertBox.innerHTML = '<span class="text-danger">System Error.</span>'; }
+        });
+
+        document.getElementById('forgotForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('resetEmail').value;
+            const msgBox = document.getElementById('forgotMsg');
+            
+            msgBox.innerHTML = '<span class="text-muted">Processing...</span>';
+            
+            try {
+                const res = await fetch('api/forgot_password.php', { 
+                    method: 'POST', 
+                    body: JSON.stringify({ email: email }) 
+                });
+                const result = await res.json();
+                
+                if(result.status === 'success') {
+                    msgBox.innerHTML = `<span class="text-success"><i class="bi bi-check-circle me-1"></i> ${result.message}</span>`;
+                    this.reset();
+                } else {
+                    msgBox.innerHTML = `<span class="text-danger">${result.message}</span>`;
+                }
+            } catch (error) {
+                msgBox.innerHTML = '<span class="text-danger">System Error</span>';
+            }
+        });
+    </script>
+</body>
+</html>
