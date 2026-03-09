@@ -269,6 +269,68 @@ After running this script, all tables required by the application will be create
 
 ---
 
+# 👑 Create the First Admin Account
+
+For security reasons, **admin accounts cannot be created from the registration page**.  
+The first admin must be created manually in the database.
+
+### Step 1 — Open MySQL
+
+```sql
+USE meal_db;
+```
+
+### Step 2 — Insert Admin User
+
+Run the following SQL:
+
+```sql
+INSERT INTO users (email, password, role, is_approved, is_blocked)
+VALUES (
+'admin@gmail.com',
+'$2a$12$lMbpI8WhghLPcsNc5U/Y1.xfnjhl4RoImh1RSWmIKGmsC1Vn/het.',
+'admin',
+1,
+0
+);
+```
+
+### Step 3 — Login
+
+Open the login page:
+
+```
+http://localhost/Smart-Meal-Management-System/login.html
+```
+
+Example login:
+
+```
+Email: admin@gmail.com
+Password: admin123
+```
+
+---
+
+### 🔐 Generating a bcrypt Password
+
+If you want to create another admin manually, generate a **bcrypt hash** for the password.
+
+You can use these online tools:
+
+- https://bcrypt-generator.com  
+- https://www.browserling.com/tools/bcrypt  
+
+Then insert the generated hash into the `users` table.
+
+Example:
+
+```sql
+INSERT INTO users (email, password, role, is_approved)
+VALUES ('newadmin@email.com', 'BCRYPT_HASH_HERE', 'admin', 1);
+```
+
+
 # ⚙️ Configure Database Connection
 
 Edit:
