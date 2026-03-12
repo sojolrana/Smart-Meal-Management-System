@@ -34,7 +34,7 @@ function renderNavbar(role, activePage = '') {
         links = `
             <li class="nav-item"><a class="nav-link ${isActive('home')}" href="index.html">Home</a></li>
             <li class="nav-item"><a class="nav-link ${isActive('features')}" href="index.html#features">Features</a></li>
-            <li class="nav-item"><a class="nav-link ${isActive('login')}" href="login.html">Login</a></li>
+            <li class="nav-item"><a class="btn btn-outline-secondary btn-sm ms-3 px-3 fw-bold" href="login.html">Login</a></li>
             <li class="nav-item"><a class="btn btn-primary btn-sm ms-3 px-3 fw-bold" href="signup.html">Sign Up</a></li>
         `;
     }
